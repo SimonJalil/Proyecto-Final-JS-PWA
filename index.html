@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lista de Supermercado</title>
+
+  <!-- Material Design Lite -->
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css" />
+  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <!-- Encabezado -->
+    <header class="mdl-layout__header">
+      <div class="mdl-layout__header-row">
+        <span class="mdl-layout-title">Mi Lista</span>
+        <div class="mdl-layout-spacer"></div>
+      </div>
+    </header>
+
+    <!-- Menú lateral -->
+    <div class="mdl-layout__drawer">
+      <span class="mdl-layout-title">Opciones</span>
+      <nav class="mdl-navigation">
+        <a class="mdl-navigation__link" href="#" data-section="inicio">Inicio</a>
+        <a class="mdl-navigation__link" href="#" data-section="config">Configuración</a>
+        <a class="mdl-navigation__link" href="#" data-section="acerca">Acerca de</a>
+      </nav>
+    </div>
+
+    <!-- Contenido principal -->
+    <main class="mdl-layout__content">
+
+      <!-- Imagen de supermercado (banner) -->
+      <div class="banner-supermercado">
+        <img src="assets/images/supermercado.png" alt="Cabecera" />
+      </div>
+
+      <!-- Contenedor dinámico SPA -->
+      <div class="page-content" id="main-content">
+        <!-- El contenido dinámico se inyectará aquí -->
+      </div>
+
+      <!-- Botón flotante (solo en sección Inicio) -->
+      <button id="fabAgregar" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored"
+        style="position: fixed; bottom: 20px; right: 20px; z-index: 10; display: none;">
+        <i class="material-icons">add</i>
+      </button>
+
+      <!-- Diálogo para agregar ítems -->
+      <dialog class="mdl-dialog" id="dialogo-formulario">
+        <h4 class="mdl-dialog__title">Agregar producto</h4>
+        <div class="mdl-dialog__content">
+          <form id="formulario-item">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="text" id="nombre-item" autocomplete="off" />
+              <label class="mdl-textfield__label" for="nombre-item">Nombre del producto</label>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="number" id="precio-item" min="0" step="0.001"
+                autocomplete="off" />
+              <label class="mdl-textfield__label" for="precio-item">Precio</label>
+            </div>
+          </form>
+        </div>
+        <div class="mdl-dialog__actions">
+          <button type="button" class="mdl-button" id="btnAgregarItem">Agregar</button>
+          <button type="button" class="mdl-button close">Cancelar</button>
+        </div>
+      </dialog>
+
+    </main>
+  </div>
+
+  <!-- Lógica JS -->
+  <script src="js/indexdb.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+
+</html>

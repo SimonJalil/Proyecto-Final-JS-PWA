@@ -1,0 +1,80 @@
+// Abrimos o creamos la base de datos
+let db;
+const request = indexedDB.open("lista_super", 1);
+
+request.onupgradeneeded = (event) => {
+    db = event.target.result;
+
+    if (!db.objectStoreNames.contains("items")) {
+        const store = db.createObjectStore("items", { keyPath: "id", autoIncrement: true });
+        store.createIndex("nombre", "nombre", { unique: false });
+        store.createIndex("precio", "precio", { unique: false });
+    }
+};
+
+request.onsuccess = (event) => {
+    db = event.target.result;
+    console.log("IndexedDB lista_super abierta correctamente");
+};
+
+
+request.onerror = (event) => {
+    console.error("Error al abrir la base de datos:", event.target.error);
+};
+
+function cargarItems() {
+    if (!db) return;
+
+    const contenedor = document.getElementById("lista-items");
+    if (!contenedor) return;
+
+    contenedor.innerHTML = `
+      <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width: 100%;">
+        <thead>
+          <tr>
+            <th class="mdl-data-table__cell--non-numeric">Producto</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body"></tbody>
+      </table>
+    `;
+
+    const tbody = document.getElementById("tabla-body");
+
+    const tx = db.transaction(["items"], "readonly");
+    const store = tx.objectStore("items");
+
+    store.openCursor().onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+            const item = cursor.value;
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+          <td class="mdl-data-table__cell--non-numeric">
+            <span contenteditable="false" class="editable-nombre">${item.nombre}</span>
+          </td>
+          <td>
+            <button class="btn-restar" data-id="${item.id}">-</button>
+            <span class="cantidad">${item.cantidad || 1}</span>
+            <button class="btn-sumar" data-id="${item.id}">+</button>
+          </td>
+          <td>
+            $<span contenteditable="false" class="editable-precio">${item.precio.toFixed(2)}</span>
+          </td>
+          <td>
+            <button class="btn-editar" data-id="${item.id}">✏️</button>
+            <button class="btn-guardar" data-id="${item.id}" style="display:none;">💾</button>
+            <button class="btn-eliminar" data-id="${item.id}">🗑️</button>
+          </td>
+        `;
+
+            tbody.appendChild(row);
+            cursor.continue();
+        }
+    };
+}
+
