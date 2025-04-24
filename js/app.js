@@ -7,6 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnAgregar = document.getElementById('btnAgregarItem');
     const btnCancelar = dialog.querySelector('.close');
     const form = document.getElementById('formulario-item');
+    const btnActualizar = document.getElementById("btnActualizarItem");
+
+
+    let edicionActual = null;
+
 
     links.forEach(link => {
         link.addEventListener('click', e => {
@@ -67,8 +72,46 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         request.onerror = () => {
-            console.error("Error al guardar el producto");
+            Toast.fire({
+                icon: 'warning',
+                title: 'Este producto ya existe'
+            });
         };
+    }
+
+    function modificarCantidad(id, delta) {
+        const tx = db.transaction(["items"], "readwrite");
+        const store = tx.objectStore("items");
+        const request = store.get(id);
+        request.onsuccess = () => {
+            const item = request.result;
+            item.cantidad = Math.max(1, (item.cantidad || 1) + delta);
+            store.put(item).onsuccess = () => {
+                cargarItems();
+            };
+        };
+    }
+
+    function eliminarItem(id) {
+        Swal.fire({
+            title: "¿Deseás eliminar este producto?",
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: "Eliminar",
+            denyButtonText: `Cancelar`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const tx = db.transaction(["items"], "readwrite");
+                const store = tx.objectStore("items");
+                store.delete(id).onsuccess = () => {
+                    cargarItems();
+                    Toast.fire({
+                        icon: 'info',
+                        title: 'Producto eliminado'
+                    });
+                };
+            }
+        });
     }
 
     // Mostrar la sección de inicio por defecto
@@ -86,12 +129,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fab.addEventListener('click', () => {
+        form.reset(); // Limpiar el formulario al abrir el diálogo
         dialog.showModal();
     });
 
     btnCancelar.addEventListener('click', () => {
+        form.reset(); // Limpiar el formulario al cerrar el diálogo
         dialog.close();
+
+        edicionActual = null;
+        btnActualizar.style.display = "none";
+        btnAgregar.style.display = "inline-block";
+
     });
+
+    // Cierra el diálogo al hacer clic fuera del mismo
+    dialog.addEventListener('click', (e) => {
+        const dialogRect = dialog.getBoundingClientRect();
+        const clickedInside =
+            e.clientX >= dialogRect.left &&
+            e.clientX <= dialogRect.right &&
+            e.clientY >= dialogRect.top &&
+            e.clientY <= dialogRect.bottom;
+
+        if (!clickedInside) {
+            form.reset();
+            dialog.close();
+
+            edicionActual = null;
+            btnActualizar.style.display = "none";
+            btnAgregar.style.display = "inline-block";
+        }
+    });
+
+
 
     btnAgregar.addEventListener('click', () => {
         const nombre = document.getElementById('nombre-item').value.trim();
@@ -107,6 +178,77 @@ document.addEventListener('DOMContentLoaded', () => {
         form.reset();
         dialog.close();
     });
+
+    btnActualizar.addEventListener("click", () => {
+        const nombre = document.getElementById("nombre-item").value.trim().toUpperCase();
+        const precio = parseFloat(document.getElementById("precio-item").value);
+
+        if (!nombre || isNaN(precio)) {
+            Toast.fire({
+                icon: "error",
+                title: "Datos inválidos"
+            });
+            return;
+        }
+
+        const tx = db.transaction(["items"], "readwrite");
+        const store = tx.objectStore("items");
+
+        const request = store.get(edicionActual.id);
+        request.onsuccess = () => {
+            const item = request.result;
+            item.nombre = nombre;
+            item.precio = precio;
+
+            store.put(item).onsuccess = () => {
+                cargarItems();
+                dialog.close();
+                form.reset();
+                edicionActual = null;
+
+                btnActualizar.style.display = "none";
+                btnAgregar.style.display = "inline-block";
+
+                Toast.fire({
+                    icon: "success",
+                    title: "Producto actualizado"
+                });
+            };
+        };
+    });
+
+    document.body.addEventListener("click", (e) => {
+        const id = parseInt(e.target.dataset.id);
+        if (!id) return;
+
+        if (e.target.classList.contains("btn-sumar")) {
+            modificarCantidad(id, 1);
+        }
+
+        if (e.target.classList.contains("btn-restar")) {
+            modificarCantidad(id, -1);
+        }
+
+        if (e.target.classList.contains("btn-eliminar")) {
+            eliminarItem(id);
+        }
+
+        if (e.target.classList.contains("btn-editar")) {
+            const fila = e.target.closest("tr");
+            const nombre = fila.querySelector(".editable-nombre").textContent.trim();
+            const precio = parseFloat(fila.querySelector(".editable-precio").textContent);
+
+            edicionActual = { id };
+
+            document.getElementById("nombre-item").value = nombre;
+            document.getElementById("precio-item").value = precio;
+
+            btnAgregar.style.display = "none";
+            btnActualizar.style.display = "inline-block";
+            dialog.showModal();
+        }
+    });
+
 });
 
 

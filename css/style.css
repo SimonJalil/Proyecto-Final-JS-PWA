@@ -1,14 +1,26 @@
 .banner-supermercado {
-    width: 100%;
-    height: 200px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .banner-supermercado img {
-    width: 100%;
-    height: auto;
-  }
-  
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-supermercado img {
+  width: 100%;
+  height: auto;
+}
+
+td span.editable-nombre {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  /* Mostrar como máximo 2 líneas */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  white-space: normal;
+  max-width: 100%;
+  /* Que respete el ancho de la celda */
+}
