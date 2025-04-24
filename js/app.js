@@ -56,11 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const tx = db.transaction(["items"], "readwrite");
         const store = tx.objectStore("items");
 
+        nombre = nombre.toUpperCase();
+        precio = parseFloat(precio);
+
         const item = { nombre, precio };
         const request = store.add(item);
 
         request.onsuccess = () => {
-            console.log("Producto agregado:", item);
             cargarItems(); // recarga la lista visual
         };
 

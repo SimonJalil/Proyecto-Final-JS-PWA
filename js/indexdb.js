@@ -1,3 +1,15 @@
+const Toast = Swal.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 2000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.onmouseenter = Swal.stopTimer;
+    toast.onmouseleave = Swal.resumeTimer;
+  }
+});
+
 // Abrimos o creamos la base de datos
 let db;
 const request = indexedDB.open("lista_super", 1);
@@ -14,7 +26,6 @@ request.onupgradeneeded = (event) => {
 
 request.onsuccess = (event) => {
     db = event.target.result;
-    console.log("IndexedDB lista_super abierta correctamente");
 };
 
 
@@ -78,3 +89,56 @@ function cargarItems() {
     };
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    document.body.addEventListener("click", (e) => {
+        const id = parseInt(e.target.dataset.id);
+        if (!id) return;
+
+        if (e.target.classList.contains("btn-sumar")) {
+            modificarCantidad(id, 1);
+        }
+
+        if (e.target.classList.contains("btn-restar")) {
+            modificarCantidad(id, -1);
+        }
+
+        if (e.target.classList.contains("btn-eliminar")) {
+            eliminarItem(id);
+        }
+    });
+});
+
+function modificarCantidad(id, delta) {
+    const tx = db.transaction(["items"], "readwrite");
+    const store = tx.objectStore("items");
+    const request = store.get(id);
+    request.onsuccess = () => {
+        const item = request.result;
+        item.cantidad = Math.max(1, (item.cantidad || 1) + delta);
+        store.put(item).onsuccess = () => {
+            cargarItems();
+        };
+    };
+}
+
+function eliminarItem(id) {
+  Swal.fire({
+    title: "¿Deseás eliminar este producto?",
+    showDenyButton: true,
+    showCancelButton: false,
+    confirmButtonText: "Eliminar",
+    denyButtonText: `Cancelar`
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const tx = db.transaction(["items"], "readwrite");
+      const store = tx.objectStore("items");
+      store.delete(id).onsuccess = () => {
+        cargarItems();
+        Toast.fire({
+          icon: 'info',
+          title: 'Producto eliminado'
+        });
+      };
+    } 
+  });
+}
