@@ -15,6 +15,19 @@
 
   <!-- Estilos personalizados -->
   <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Theme color -->
+  <meta name="theme-color" content="#3F51B5" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/favicon/android-icon-96x96.png" />
+
+  <!-- Apple Touch -->
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-icon-180x180.png" />
+
 </head>
 
 <body>
@@ -33,7 +46,7 @@
       <span class="mdl-layout-title">Opciones</span>
       <nav class="mdl-navigation">
         <a class="mdl-navigation__link" href="#" data-section="inicio">Inicio</a>
-        <a class="mdl-navigation__link" href="#" data-section="config">Configuración</a>
+        <a class="mdl-navigation__link" href="#" data-section="config">Estadísticas</a>
         <a class="mdl-navigation__link" href="#" data-section="acerca">Acerca de</a>
       </nav>
     </div>
@@ -85,9 +98,18 @@
   </div>
 
 
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('✅ SW registrado:', reg))
+        .catch(err => console.error('❌ SW error:', err));
+    }
+  </script>
 
   <!-- SweetAlert2 primero -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
   <!-- Luego tu lógica -->
   <script src="js/indexdb.js"></script>

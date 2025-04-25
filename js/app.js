@@ -38,21 +38,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case 'config':
                 mainContent.innerHTML = `
-              <div class="mdl-grid">
-                <h5>Configuración</h5>
-                <p>Opciones de configuración próximamente.</p>
-              </div>`;
+                    <div class="mdl-grid">
+                        <h5>Estadísticas</h5>
+
+                        <div class="grafico-container">
+                        <canvas id="grafico-cantidad"></canvas>
+                        </div>
+                        <div class="grafico-container">
+                        <canvas id="grafico-precio-alto"></canvas>
+                        </div>
+                        <div class="grafico-container">
+                        <canvas id="grafico-precio-bajo"></canvas>
+                        </div>
+                    </div>
+                    `;
+
                 fab.style.display = 'none';
+
+                // ✅ Llamar después de inyectar el HTML
+                setTimeout(() => generarGraficos(), 0);
                 break;
+
 
             case 'acerca':
                 mainContent.innerHTML = `
-              <div class="mdl-grid">
-                <h5>Acerca de</h5>
-                <p>PWA desarrollada por Simon Jalil.</p>
-              </div>`;
+                      <div class="mdl-grid" style="justify-content: center; text-align: center; margin-top: 2rem;">
+                        <div class="mdl-cell mdl-cell--12-col" style="max-width: 400px; margin: auto;">
+                          <img src="assets/images/foto-perfil.jpeg" alt="Simón Jalil" style="
+                            width: 160px;
+                            height: 160px;
+                            border-radius: 50%;
+                            object-fit: cover;
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                            margin-bottom: 1rem;
+                          " />
+                          <h4 style="margin: 0 0 0.5rem 0;">Simón Jalil</h4>
+                          <p style="color: #666; font-size: 0.95rem; margin-bottom: 1rem;">
+                            Desarrollador de esta PWA de Lista de Supermercado 💡
+                          </p>
+                          <p style="font-size: 0.85rem; color: #888;">
+                            HTML · CSS · JavaScript · IndexedDB · Chart.js · SweetAlert2 · MDL
+                          </p>
+                        </div>
+                      </div>
+                    `;
                 fab.style.display = 'none';
                 break;
+
         }
     }
 
@@ -169,7 +201,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const precio = parseFloat(document.getElementById('precio-item').value);
 
         if (!nombre || isNaN(precio)) {
-            alert("Por favor completá ambos campos correctamente.");
+            Toast.fire({
+                icon: "error",
+                title: "Faltan datos"
+            });
+
             return;
         }
 
@@ -240,14 +276,128 @@ document.addEventListener('DOMContentLoaded', () => {
 
             edicionActual = { id };
 
-            document.getElementById("nombre-item").value = nombre;
-            document.getElementById("precio-item").value = precio;
+            const nombreInput = document.getElementById("nombre-item");
+            const precioInput = document.getElementById("precio-item");
+
+            nombreInput.value = nombre;
+            precioInput.value = precio;
+
+            nombreInput.parentElement.classList.add("is-dirty");
+            precioInput.parentElement.classList.add("is-dirty");
 
             btnAgregar.style.display = "none";
             btnActualizar.style.display = "inline-block";
             dialog.showModal();
         }
     });
+
+
+
+    function generarGraficos() {
+        const contenedor = document.getElementById("main-content");
+        contenedor.innerHTML = `
+        <div class="mdl-grid">
+          <div class="mdl-cell mdl-cell--12-col">
+            <h5>Estadísticas</h5>
+      
+            <div class="grafico-container">
+              <canvas id="grafico-cantidad"></canvas>
+            </div>
+      
+            <div class="grafico-container">
+              <canvas id="grafico-precio-mayor"></canvas>
+            </div>
+      
+            <div class="grafico-container">
+              <canvas id="grafico-precio-menor"></canvas>
+            </div>
+          </div>
+        </div>
+      `;
+
+
+        const tx = db.transaction(["items"], "readonly");
+        const store = tx.objectStore("items");
+
+        let cantidades = [];
+        let precios = [];
+
+        store.openCursor().onsuccess = (event) => {
+            const cursor = event.target.result;
+            if (cursor) {
+                const item = cursor.value;
+                cantidades.push({ nombre: item.nombre, cantidad: item.cantidad || 1 });
+                precios.push({ nombre: item.nombre, precio: item.precio || 0 });
+                cursor.continue();
+            } else {
+                // === GRÁFICO DE TORTA - Top 5 por cantidad ===
+                cantidades.sort((a, b) => b.cantidad - a.cantidad);
+                const top5 = cantidades.slice(0, 5);
+
+                new Chart(document.getElementById("grafico-cantidad"), {
+                    type: "doughnut",
+                    data: {
+                        labels: top5.map(i => i.nombre),
+                        datasets: [{
+                            data: top5.map(i => i.cantidad),
+                            backgroundColor: ["#4dc9f6", "#f67019", "#f53794", "#537bc4", "#acc236"],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: { position: "top" }
+                        }
+                    }
+                });
+
+                // === GRÁFICO DE BARRAS - Precio más alto ===
+                precios.sort((a, b) => b.precio - a.precio);
+                const mayor = precios.slice(0, 5);
+
+                new Chart(document.getElementById("grafico-precio-mayor"), {
+                    type: "bar",
+                    data: {
+                        labels: mayor.map(i => i.nombre),
+                        datasets: [{
+                            label: "Precio más alto",
+                            data: mayor.map(i => i.precio),
+                            backgroundColor: "rgba(255, 99, 132, 0.4)"
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: "top" }
+                        }
+                    }
+                });
+
+                // === GRÁFICO DE BARRAS - Precio más bajo ===
+                precios.sort((a, b) => a.precio - b.precio);
+                const menor = precios.slice(0, 5);
+
+                new Chart(document.getElementById("grafico-precio-menor"), {
+                    type: "bar",
+                    data: {
+                        labels: menor.map(i => i.nombre),
+                        datasets: [{
+                            label: "Precio más bajo",
+                            data: menor.map(i => i.precio),
+                            backgroundColor: "rgba(75, 192, 192, 0.4)"
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: "top" }
+                        }
+                    }
+                });
+            }
+        };
+    }
+
 
 });
 

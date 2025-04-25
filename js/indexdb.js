@@ -61,33 +61,54 @@ function cargarItems() {
   const tx = db.transaction(["items"], "readonly");
   const store = tx.objectStore("items");
 
+  let totalProductos = 0;
+  let totalPrecio = 0;
+
+
   store.openCursor().onsuccess = (event) => {
     const cursor = event.target.result;
     if (cursor) {
       const item = cursor.value;
-      const row = document.createElement("tr");
 
+      const cantidad = item.cantidad || 1;
+      const precioUnitario = item.precio || 0;
+
+      totalProductos += cantidad;
+      totalPrecio += cantidad * precioUnitario;
+
+      const row = document.createElement("tr");
       row.innerHTML = `
-          <td class="mdl-data-table__cell--non-numeric">
-            <span contenteditable="false" class="editable-nombre">${item.nombre}</span>
-          </td>
-          <td>
-            <button class="btn-restar" data-id="${item.id}">-</button>
-            <span class="cantidad">${item.cantidad || 1}</span>
-            <button class="btn-sumar" data-id="${item.id}">+</button>
-          </td>
-          <td>
-            $<span contenteditable="false" class="editable-precio">${item.precio.toFixed(2)}</span>
-          </td>
-          <td>
-            <button class="btn-editar" data-id="${item.id}">✏️</button>
-            <button class="btn-guardar" data-id="${item.id}" style="display:none;">💾</button>
-            <button class="btn-eliminar" data-id="${item.id}">🗑️</button>
-          </td>
-        `;
+        <td class="mdl-data-table__cell--non-numeric">
+          <span contenteditable="false" class="editable-nombre">${item.nombre}</span>
+        </td>
+        <td>
+          <button class="btn-restar" data-id="${item.id}">-</button>
+          <span class="cantidad">${cantidad}</span>
+          <button class="btn-sumar" data-id="${item.id}">+</button>
+        </td>
+        <td>
+          $<span contenteditable="false" class="editable-precio">${precioUnitario.toFixed(2)}</span>
+        </td>
+        <td>
+          <button class="btn-editar" data-id="${item.id}">✏️</button>
+          <button class="btn-guardar" data-id="${item.id}" style="display:none;">💾</button>
+          <button class="btn-eliminar" data-id="${item.id}">🗑️</button>
+        </td>
+      `;
 
       tbody.appendChild(row);
       cursor.continue();
+    }
+    else {
+      const totalRow = document.createElement("tr");
+      totalRow.innerHTML = `
+        <td class="mdl-data-table__cell--non-numeric"><strong>Total</strong></td>
+        <td><strong>${totalProductos}</strong></td>
+        <td colspan="2"><strong>$${totalPrecio.toFixed(2)}</strong></td>
+      `;
+      totalRow.style.backgroundColor = "#f5f5f5";
+      totalRow.style.fontWeight = "bold";
+      tbody.appendChild(totalRow);
     }
   };
 }

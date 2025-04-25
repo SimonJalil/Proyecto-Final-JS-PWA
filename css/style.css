@@ -24,3 +24,18 @@ td span.editable-nombre {
   max-width: 100%;
   /* Que respete el ancho de la celda */
 }
+
+.grafico-container {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.grafico-container canvas {
+  width: 100% !important;
+  height: auto !important;
+}
