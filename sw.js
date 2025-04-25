@@ -4,9 +4,9 @@ const URLS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/css/style.css', 
+  '/css/style.css',
   '/js/app.js',
-  '/js/indexdb.js', 
+  '/js/indexdb.js',
   '/assets/images/supermercado.png',
 
   // Favicons (agrega aquí las que uses)
@@ -28,7 +28,10 @@ const URLS_TO_CACHE = [
 // INSTALACIÓN: Caching de archivos estáticos
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(URLS_TO_CACHE))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(URLS_TO_CACHE).catch((error) => {
+      console.error('Error al almacenar en caché:', error);
+    }
+    ))
   );
   self.skipWaiting();
 });
