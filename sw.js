@@ -8,6 +8,7 @@ const URLS_TO_CACHE = [
   '/Proyecto-Final-JS-PWA/js/app.js',
   '/Proyecto-Final-JS-PWA/js/indexdb.js',
   '/Proyecto-Final-JS-PWA/assets/images/supermercado.png',
+  '/Proyecto-Final-JS-PWA/assets/images/foto-perfil.jpeg',
 
   // Favicons
   '/Proyecto-Final-JS-PWA/assets/favicon/android-icon-192x192.png',
