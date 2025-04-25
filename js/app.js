@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainContent = document.getElementById('main-content');
     const layout = document.querySelector('.mdl-layout');
     const fab = document.getElementById('fabAgregar');
+    const btnDescargarPdf = document.getElementById('btnDescargarPdf');
     const dialog = document.getElementById('dialogo-formulario');
     const btnAgregar = document.getElementById('btnAgregarItem');
     const btnCancelar = dialog.querySelector('.close');
@@ -33,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   </div>
                 `;
                 fab.style.display = 'block';
+                btnDescargarPdf.style.display = 'block';
+
                 cargarItems(); // ✅ solo cuando ya existe #lista-items
                 break;
 
@@ -54,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
 
                 fab.style.display = 'none';
+                btnDescargarPdf.style.display = 'none';
 
                 // ✅ Llamar después de inyectar el HTML
                 setTimeout(() => generarGraficos(), 0);
@@ -83,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                       </div>
                     `;
                 fab.style.display = 'none';
+                btnDescargarPdf.style.display = 'none';
                 break;
 
         }
@@ -291,29 +296,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
-
     function generarGraficos() {
         const contenedor = document.getElementById("main-content");
         contenedor.innerHTML = `
-        <div class="mdl-grid">
-          <div class="mdl-cell mdl-cell--12-col">
-            <h5>Estadísticas</h5>
-      
-            <div class="grafico-container">
-              <canvas id="grafico-cantidad"></canvas>
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                <h5>Estadísticas</h5>
+
+                <div class="grafico-container">
+                    <h6 style="margin-bottom: 0.5rem;">Top 5 productos por cantidad</h6>
+                    <canvas id="grafico-cantidad"></canvas>
+                </div>
+
+                <div class="grafico-container">
+                    <h6 style="margin-bottom: 0.5rem;">Productos con precio más alto</h6>
+                    <canvas id="grafico-precio-mayor"></canvas>
+                </div>
+
+                <div class="grafico-container">
+                    <h6 style="margin-bottom: 0.5rem;">Productos con precio más bajo</h6>
+                    <canvas id="grafico-precio-menor"></canvas>
+                </div>
+                </div>
             </div>
-      
-            <div class="grafico-container">
-              <canvas id="grafico-precio-mayor"></canvas>
-            </div>
-      
-            <div class="grafico-container">
-              <canvas id="grafico-precio-menor"></canvas>
-            </div>
-          </div>
-        </div>
-      `;
+            `;
+
 
 
         const tx = db.transaction(["items"], "readonly");
@@ -397,6 +404,53 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
+
+    btnDescargarPdf.addEventListener('click', async () => {
+        const doc = new jsPDF();
+
+        const tx = db.transaction(["items"], "readonly");
+        const store = tx.objectStore("items");
+
+        const items = [];
+
+        store.openCursor().onsuccess = function (event) {
+            const cursor = event.target.result;
+            if (cursor) {
+                const item = cursor.value;
+                items.push([
+                    item.nombre,
+                    item.cantidad || 1,
+                    `$${item.precio.toFixed(2)}`
+                ]);
+                cursor.continue();
+            } else {
+                // 🎯 Aca antes de generar el PDF, validamos:
+                if (items.length === 0) {
+                    Toast.fire({
+                        icon: "info",
+                        title: "No hay productos para descargar"
+                    });
+                    return;
+                }
+
+                // ✅ Continuar generando el PDF normalmente
+                doc.text("Lista de Supermercado", 14, 20);
+                doc.autoTable({
+                    startY: 30,
+                    head: [["Producto", "Cantidad", "Precio"]],
+                    body: items,
+                });
+
+                const totalCantidad = items.reduce((acc, item) => acc + parseInt(item[1]), 0);
+                const totalPrecio = items.reduce((acc, item) => acc + parseFloat(item[2].replace('$', '')), 0);
+
+                doc.text(`Total de productos: ${totalCantidad}`, 14, doc.lastAutoTable.finalY + 10);
+                doc.text(`Total general: $${totalPrecio.toFixed(2)}`, 14, doc.lastAutoTable.finalY + 20);
+
+                doc.save("lista-supermercado.pdf");
+            }
+        };
+    });
 
 
 });

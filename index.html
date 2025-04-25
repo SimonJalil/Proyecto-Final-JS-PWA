@@ -70,6 +70,13 @@
         <i class="material-icons">add</i>
       </button>
 
+      <!-- Botón flotante de descarga PDF -->
+      <button id="btnDescargarPdf" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-color--red"
+        style="position: fixed; bottom: 20px; right: 90px; z-index: 10; display: none;" title="Descargar PDF">
+        <i class="material-icons">picture_as_pdf</i>
+      </button>
+
+
       <!-- Diálogo para agregar ítems -->
       <dialog class="mdl-dialog" id="dialogo-formulario">
         <h4 class="mdl-dialog__title">Agregar producto</h4>
@@ -109,6 +116,12 @@
   <!-- SweetAlert2 primero -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    window.jsPDF = window.jspdf.jsPDF;
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 
 
   <!-- Luego tu lógica -->
