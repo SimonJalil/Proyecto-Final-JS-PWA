@@ -1,26 +1,26 @@
 const CACHE_NAME = 'mi-lista-v1';
 
 const URLS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/css/style.css',
-  '/js/app.js',
-  '/js/indexdb.js',
-  '/assets/images/supermercado.png',
+  '/Proyecto-Final-JS-PWA/',
+  '/Proyecto-Final-JS-PWA/index.html',
+  '/Proyecto-Final-JS-PWA/manifest.json',
+  '/Proyecto-Final-JS-PWA/css/style.css',
+  '/Proyecto-Final-JS-PWA/js/app.js',
+  '/Proyecto-Final-JS-PWA/js/indexdb.js',
+  '/Proyecto-Final-JS-PWA/assets/images/supermercado.png',
 
-  // Favicons (agrega aquí las que uses)
-  '/assets/favicon/android-icon-192x192.png',
-  '/assets/favicon/apple-icon-180x180.png',
-  '/assets/favicon/favicon-96x96.png',
-  '/assets/favicon/favicon.ico',
+  // Favicons
+  '/Proyecto-Final-JS-PWA/assets/favicon/android-icon-192x192.png',
+  '/Proyecto-Final-JS-PWA/assets/favicon/apple-icon-180x180.png',
+  '/Proyecto-Final-JS-PWA/assets/favicon/favicon-96x96.png',
+  '/Proyecto-Final-JS-PWA/assets/favicon/favicon.ico',
 
   // Material Design Lite
   'https://code.getmdl.io/1.3.0/material.min.js',
   'https://code.getmdl.io/1.3.0/material.indigo-pink.min.css',
   'https://fonts.googleapis.com/icon?family=Material+Icons',
 
-  // Chart.js y SweetAlert2 (si los estás cargando por CDN)
+  // Chart.js y SweetAlert2
   'https://cdn.jsdelivr.net/npm/chart.js',
   'https://cdn.jsdelivr.net/npm/sweetalert2@11'
 ];
